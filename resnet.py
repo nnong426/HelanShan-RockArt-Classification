@@ -17,13 +17,12 @@ from torch.optim.lr_scheduler import LinearLR, CosineAnnealingLR
 from datetime import datetime
 from colorama import Fore, Style, init
 
+
 # 导入自定义模块 
 from std_resnet import resnet18
 from metric import accuracy
 from seed import set_seed
-# 如果你有Draw.py，请确保上传，或者注释掉下面这一行
-try:
-    from Draw import plot_confusion
+from Draw import plot_confusion
 except ImportError:
     plot_confusion = None 
 
@@ -31,14 +30,12 @@ except ImportError:
 init()
 os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 
-# ==========================================
-# 1. 配置参数 (Configuration)
-# ==========================================
+
 CFG = {
     'batch_size': 10,
-    "num_workers": 0,  # Windows下建议设为0，Linux可设为4
+    "num_workers": 0, 
     'pin_memory': False,
-    "use_mixup_or_cutmix": True, # 论文中重点提到的策略，必须为True
+    "use_mixup_or_cutmix": True, 
     'amp': True,
     "device": 'cuda' if torch.cuda.is_available() else 'cpu',
     "warmup_epochs": 0,
@@ -46,13 +43,12 @@ CFG = {
     "label_smoothing": 0.1,
     "weight_decay": 1e-5,
     "epochs": 200,
-    "lr_range": [2e-4 * i for i in range(1, 10, 2)], # 对应论文中的网格搜索
+    "lr_range": [2e-4 * i for i in range(1, 10, 2)], 
     "seed": 42
 }
 
-# ==========================================
-# 2. 数据准备 (Data Preparation)
-# ==========================================
+
+# (Data Preparation)
 def load_data(csv_path="./classification_image/MetaData.csv", img_root="./classification_image/"):
     """
     读取CSV和图像数据
@@ -82,9 +78,8 @@ def load_data(csv_path="./classification_image/MetaData.csv", img_root="./classi
     
     return data, labels, name2label, label_set
 
-# ==========================================
-# 3. 数据增强 (Augmentation)
-# ==========================================
+
+# (Augmentation)
 # 计算的均值和方差 
 pixels_mean = [0.485, 0.456, 0.406] 
 pixels_std = [0.229, 0.224, 0.225]
@@ -121,7 +116,7 @@ train_tf = A.Compose([
     A.Resize(224, 224),
     A.RandomResizedCrop(size=(Crop_Size, Crop_Size), scale=(0.08, 1.0), ratio=(3.0 / 4.0, 4.0 / 3.0)),
     A.HorizontalFlip(p=0.5),
-    # RandAugmentWrapper(num_ops=1, magnitude=9, p=1.0), # 如果需要开启RandAugment，取消注释
+    RandAugmentWrapper(num_ops=1, magnitude=9, p=1.0), 
     A.Normalize(mean=pixels_mean, std=pixels_std),
     ToTensorV2()               
 ])
@@ -153,9 +148,9 @@ class CustomDataset(Dataset):
             
         return augmented, torch.tensor(label, dtype=torch.long)
 
-# ==========================================
-# 4. 训练流程 (Training Loop)
-# ==========================================
+
+#  (Training Loop)
+
 def train_one_epoch(epoch, model, optimizer, criterion, scaler, train_loader, device):
     model.train()
     running_loss, running_top1 = 0., 0.
@@ -204,11 +199,11 @@ def validate(model, criterion, test_loader, device):
     return running_loss / len(test_loader.dataset), running_top1 / len(test_loader.dataset)
 
 def main():
-    # 1. 设置种子
+   
     set_seed(CFG['seed'])
     seed_worker = set_seed(CFG['seed'])
 
-    # 2. 加载数据
+  
     data, labels, name2label, label_set = load_data()
     if len(data) == 0:
         print("No data loaded. Exiting.")
@@ -217,13 +212,13 @@ def main():
     CFG["NUM_CLASSES"] = len(name2label)
     print(f"Classes: {name2label}")
 
-    # 3. 划分数据集 (Stratified Split)
+   
     X_train, X_test, y_train, y_test = train_test_split(
         data, labels, test_size=0.3, shuffle=True, 
         random_state=2021, stratify=labels
     )
     
-    # 4. 遍历学习率进行训练 (网格搜索)
+    
     metrics = []
     for lr in CFG['lr_range']:
         print(f"\nTraining with Learning Rate: {lr:.2e}")
