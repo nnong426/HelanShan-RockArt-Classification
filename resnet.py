@@ -52,7 +52,6 @@ CFG = {
 def load_data(csv_path="./classification_image/MetaData.csv", img_root="./classification_image/"):
     """
     读取CSV和图像数据
-    注意：Github仓库中请提供示例MetaData.csv和对应的文件夹结构
     """
     if not os.path.exists(csv_path):
         print(f"Warning: Metadata file not found at {csv_path}. Please check directory structure.")
