@@ -4,7 +4,7 @@ Notice on Code and Data Availability (代码与数据开源声明)
 
 Due to the strict copyright regulations regarding the Helan Mountain Cultural Heritage and the protection of Intellectual Property  associated with this ongoing research project, the complete source code and raw rock art image datasets are not publicly available. 
 
-The directory structure and metadata format are provided below solely for reference purposes to illustrate the experimental setup and methodology. Researchers requiring access to desensitized data or core scripts for academic validation purposes may contact the corresponding author via email. Access will be evaluated on a case-by-case basis.
+Only the experimental directory structure and metadata format examples of this study are provided below, to help peer researchers understand our experimental design and methodology. For legitimate academic reproduction and verification purposes, please contact the authors via email to submit an access request.
 
 ---
 
